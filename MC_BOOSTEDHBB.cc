@@ -108,8 +108,11 @@ namespace Rivet {
 
         //Now book histograms to plot
         bookFourMom("Associated-BHad");
+        bookFourMom("Jet");
         bookFourMomAllAlgorithms("All-BHad");
-        return;
+				bookFourMomPair("Jet","BHad");
+				bookFourMomComp("Jet","BHad");
+				return;
     }
 
 
@@ -219,7 +222,7 @@ namespace Rivet {
         MSG_DEBUG("Booking " << label << " histograms.");
 
         foreach (const string& chan, channels) {
-            histos1D[chan][label]["pt"] = bookHisto(chan + "_" + label + "_pt", label, ptlab, 25, 0, 2000*GeV);
+            histos1D[chan][label]["pt"] = bookHisto(chan + "_" + label + "_pt", label, ptlab, 40, 0, 400*GeV);
             histos1D[chan][label]["eta"] = bookHisto(chan + "_" + label + "_eta", label, "$\\eta$", 25, -5, 5);
         }
 
@@ -228,8 +231,8 @@ namespace Rivet {
     void MC_BOOSTEDHBB::bookFourMomAllAlgorithms(const string& label) {
         MSG_DEBUG("Booking " << label << " histograms.");
 
-        histos1DAllAlgorithms[label]["pt"] = bookHisto(label + "_pt", label, ptlab, 25, 0, 2000*GeV);
-        histos1DAllAlgorithms[label]["eta"] = bookHisto(label + "_eta", label, "$\\eta$", 25, -5, 5);
+        histos1DAllAlgorithms[label]["pt"] = bookHisto(label + "_pt", label, ptlab, 40, 0, 400*GeV);
+        histos1DAllAlgorithms[label]["eta"] = bookHisto(label + "_eta", label, "$\\eta$", 40, -5, 5);
 
         return;
     }
@@ -244,19 +247,19 @@ namespace Rivet {
 
         foreach (const string& chan, channels) {
             // extra histograms for pairs of particles
-            histos1D[chan][label]["dr"] = bookHisto(chan + "_" + label + "_dr", drlab, "", 25, 0, 5);
+//            histos1D[chan][label]["dr"] = bookHisto(chan + "_" + label + "_dr", drlab, "", 40, 0, 4);
 
-            histos2D[chan][label]["dr_vs_pt"] = bookHisto(chan + "_" + label + "_dr_vs_pt", label,
-                    ptlab, 25, 0, 2000*GeV,
-                    drlab, 25, 0, 5);
+        //    histos2D[chan][label]["dr_vs_pt"] = bookHisto(chan + "_" + label + "_dr_vs_pt", label,
+         //           ptlab, 25, 0, 2000*GeV,
+          //          drlab, 25, 0, 5);
 
             histos2D[chan][label]["pt1_vs_pt2"] = bookHisto(chan + "_" + label + "_pt1_vs_pt2", label,
-                    ptlab, 25, 0, 2000*GeV,
-                    ptlab, 25, 0, 2000*GeV);
+                    ptlab, 40, 0, 2000*GeV,
+                    ptlab, 40, 0, 2000*GeV);
 
             // pt balance
-            histos1D[chan][label]["pt1_minus_pt2"] = bookHisto(chan + "_" + label + "_pt1_minus_pt2", label,
-                    ptlab, 25, -1000*GeV, 1000*GeV);
+       //     histos1D[chan][label]["pt1_minus_pt2"] = bookHisto(chan + "_" + label + "_pt1_minus_pt2", label,
+         //           ptlab, 25, -1000*GeV, 1000*GeV);
         }
 
         return;
@@ -386,7 +389,6 @@ namespace Rivet {
         return;
     }
 
-
     void MC_BOOSTEDHBB::fillFourMomPair(const string& channel,
             const string& label1, const FourMomentum& p1,
             const string& label2, const FourMomentum& p2,
@@ -395,13 +397,13 @@ namespace Rivet {
         const string& label = label1 + "_" + label2;
         fillFourMom(channel, label, p1 + p2, weight);
 
-        double dr = Rivet::deltaR(p1, p2);
-        double pt = (p1 + p2).pT();
+        //double dr = Rivet::deltaR(p1, p2);
+       // double pt = (p1 + p2).pT();
 
-        histos1D[channel][label]["dr"]->fill(dr, weight);
-        histos2D[channel][label]["dr_vs_pt"]->fill(pt, dr);
+//        histos1D[channel][label]["dr"]->fill(dr, weight);
+//        histos2D[channel][label]["dr_vs_pt"]->fill(pt, dr);
         histos2D[channel][label]["pt1_vs_pt2"]->fill(p2.pT(), p1.pT());
-        histos1D[channel][label]["pt1_minus_pt2"]->fill(p1.pT() - p2.pT());
+  //      histos1D[channel][label]["pt1_minus_pt2"]->fill(p1.pT() - p2.pT());
 
         return;
     }
@@ -548,16 +550,20 @@ namespace Rivet {
         string name;
         double ptMin;
         foreach (const JetCollection& jetColl, jetColls) {
-            name = jetColl.first;
+						name = jetColl.first;
             ptMin = jetColl.second;
 
+						//Note here we change the pT cut depending on the type of algorithm used.
             const Jets& jets =
                 applyProjection<FastJets>(event, name).jetsByPt(ptMin);
 
             foreach (const Jet& jet, jets) {
                 //Note that jet.bTags() will return the b hadrons associated with that jet via ghost association.
                 foreach (const Particle& bhad, jet.bTags()) {
+                    fillFourMom(name, "Jet", jet, weight);
                     fillFourMom(name, "Associated-BHad", bhad, weight);
+										fillFourMomPair(name,"Jet", jet,"BHad", bhad, weight);
+										fillFourMomComp(name,"Jet", jet,"BHad", bhad,weight);
                 }
             }
 
