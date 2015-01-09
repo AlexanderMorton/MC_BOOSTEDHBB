@@ -107,11 +107,11 @@ namespace Rivet {
         addProjection(HeavyHadrons(-2.5, 2.5, 5*GeV), "HeavyHadrons");
 
         //Now book histograms to plot
-//        bookFourMom("Associated-BHad");
-        bookFourMom("Jet");
-  //      bookFourMomAllAlgorithms("All-BHad");
-//				bookFourMomPair("Jet","BHad");
-	//			bookFourMomComp("Jet","BHad");
+				bookFourMom("Associated-BHad");
+				bookFourMom("Jet");
+				bookFourMomAllAlgorithms("All-BHad");
+				bookFourMomPair("Jet","BHad");
+				bookFourMomComp("Jet","BHad");
 				return;
     }
 
@@ -122,9 +122,9 @@ namespace Rivet {
         if (!bhads.size()){
             vetoEvent;
         }
-        foreach (const Particle bHad, bhads) {
-            fillFourMomAllAlgorithms("All-BHad",bHad, event.weight());
-        }
+    //    foreach (const Particle bHad, bhads) {
+         //   fillFourMomAllAlgorithms("All-BHad",bHad, event.weight());
+     //   }
         fillBHadAssociated(event, collections);
 
         return;
@@ -559,12 +559,12 @@ namespace Rivet {
 
             foreach (const Jet& jet, jets) {
                 //Note that jet.bTags() will return the b hadrons associated with that jet via ghost association.
-                foreach (const Particle& bhad, jet.bTags()) {
-                    fillFourMom(name, "Jet", jet, weight);
+								fillFourMom(name, "Jet", jet, weight);
+             //   foreach (const Particle& bhad, jet.bTags()) {
              //       fillFourMom(name, "Associated-BHad", bhad, weight);
 						//				fillFourMomPair(name,"Jet", jet,"BHad", bhad, weight);
 						//				fillFourMomComp(name,"Jet", jet,"BHad", bhad,weight);
-                }
+             //   }
             }
 
         }
